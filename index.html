@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Market Masters – Stock Simulation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #050818;
+      --bg-soft: #0c1224;
+      --card: #141a2e;
+      --accent: #00e676;
+      --accent-soft: rgba(0, 230, 118, 0.12);
+      --accent2: #ffb300;
+      --text: #f5f5f5;
+      --muted: #9ea5c9;
+      --danger: #ff5252;
+      --danger-soft: rgba(255, 82, 82, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #1e2748 0, #050818 55%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background: conic-gradient(
+        from 140deg,
+        #00e676,
+        #00b0ff,
+        #ffb300,
+        #ff5252,
+        #00e676
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 30px rgba(0, 230, 118, 0.5);
+    }
+
+    .brand-logo span {
+      font-weight: 800;
+      font-size: 22px;
+    }
+
+    .brand-text h1 {
+      font-size: 20px;
+      line-height: 1.1;
+    }
+
+    .brand-text p {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: radial-gradient(circle at top left, #273156 0, #141a2e 45%);
+      border-radius: 18px;
+      padding: 14px 16px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+
+    h3 {
+      font-size: 14px;
+      margin: 10px 0 6px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 7px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(3, 8, 25, 0.9);
+      color: var(--text);
+      font-size: 13px;
+      margin-bottom: 6px;
+      outline: none;
+    }
+
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    button {
+      border-radius: 999px;
+      border: none;
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 3px 2px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00e676, #00b0ff);
+      color: #050814;
+      box-shadow: 0 8px 24px rgba(0, 230, 118, 0.35);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: var(--text);
+    }
+
+    .btn-danger {
+      background: var(--danger-soft);
+      color: #ffd6d9;
+      border: 1px solid rgba(255, 82, 82, 0.7);
+    }
+
+    .small-text {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .metrics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .metric {
+      flex: 1 1 120px;
+      background: rgba(5, 10, 30, 0.95);
+      border-radius: 14px;
+      padding: 7px 9px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .metric-label {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .metric-value {
+      font-size: 15px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .metric-sub {
+      font-size: 11px;
+      margin-top: 2px;
+    }
+
+    .positive {
+      color: var(--accent);
+    }
+
+    .negative {
+      color: var(--danger);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 6px;
+      font-size: 12px;
+    }
+
+    th,
+    td {
+      padding: 5px 4px;
+      text-align: center;
+    }
+
+    th {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    tr:nth-child(even) td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .qty-input {
+      width: 60px;
+      padding: 4px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(5, 8, 25, 0.9);
+      color: var(--text);
+      font-size: 11px;
+      outline: none;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: rgba(255, 255, 255, 0.06);
+      margin-left: 4px;
+    }
+
+    .lb-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(5, 10, 30, 0.95);
+      padding: 4px 8px;
+      border-radius: 999px;
+      margin-bottom: 4px;
+      font-size: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+
+    .auth-tab {
+      flex: 1;
+      text-align: center;
+      padding: 6px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .auth-tab.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 14px;
+      right: 14px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(5, 8, 20, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      font-size: 12px;
+      display: none;
+      z-index: 1000;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="brand-logo">
+          <span>₿</span>
+        </div>
+        <div class="brand-text">
+          <h1>Market Masters</h1>
+          <p>Stock Simulation Platform for Fests</p>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <!-- PLAYER SIDE -->
+      <div>
+        <div class="panel">
+          <h2>Player Panel <span class="badge">Teams use this</span></h2>
+
+          <label for="playerTeamName">Team Name</label>
+          <input id="playerTeamName" placeholder="Example: Bulls on Parade" />
+
+          <label for="playerGameCode">Game Code</label>
+          <input id="playerGameCode" placeholder="Given by organiser" />
+
+          <button class="btn-primary" id="joinGameBtn">Join Game</button>
+          <p class="small-text">
+            Each team opens this website on their own phone/laptop and joins with the game code announced by the organiser.
+          </p>
+        </div>
+
+        <div class="panel" id="playerArea" class="hidden">
+          <h3>Dashboard</h3>
+          <div class="metrics">
+            <div class="metric">
+              <div class="metric-label">Team</div>
+              <div class="metric-value" id="teamNameDisplay">–</div>
+              <div class="metric-sub">Game: <span id="gameCodeDisplay">–</span></div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Cash</div>
+              <div class="metric-value" id="cashDisplay">₹0</div>
+              <div class="metric-sub">Starting: ₹1,00,000</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Portfolio Value</div>
+              <div class="metric-value" id="portfolioDisplay">₹0</div>
+              <div class="metric-sub" id="plDisplay">P/L: ₹0</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Round</div>
+              <div class="metric-value" id="roundDisplay">LOCKED</div>
+              <div class="metric-sub small-text">
+                Admin controls the round from organiser panel.
+              </div>
+            </div>
+          </div>
+
+          <h3 style="margin-top: 10px;">Live Market Board</h3>
+          <p class="small-text">
+            Enter quantity in <b>Qty</b>, then click BUY / SELL. Trading works only in BUY and TRADE rounds.
+          </p>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Stock</th>
+                <th>Sector</th>
+                <th>Price</th>
+                <th>Qty</th>
+                <th>Buy</th>
+                <th>Sell</th>
+              </tr>
+            </thead>
+            <tbody id="marketTableBody"></tbody>
+          </table>
+
+          <h3 style="margin-top: 10px;">My Portfolio</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Stock</th>
+                <th>Qty</th>
+                <th>Avg. Buy</th>
+                <th>Last Price</th>
+                <th>P/L</th>
+              </tr>
+            </thead>
+            <tbody id="portfolioTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ADMIN SIDE -->
+      <div>
+        <!-- LOGIN / SIGNUP -->
+        <div class="panel">
+          <h2>Organizer Login / Signup <span class="badge">Local only</span></h2>
+          <div class="auth-tabs">
+            <div class="auth-tab active" id="tabSignup">Sign Up</div>
+            <div class="auth-tab" id="tabLogin">Login</div>
+          </div>
+
+          <label for="authEmail">Email (for organiser)</label>
+          <input id="authEmail" placeholder="you@example.com" />
+
+          <label for="authPassword">Password</label>
+          <input id="authPassword" type="password" placeholder="Choose a password" />
+
+          <button class="btn-primary" id="authSubmitBtn">Sign Up</button>
+          <p class="small-text">
+            This is a <b>simple local login</b> stored in the browser only (not secure for real money, but fine for a college event).
+          </p>
+        </div>
+
+        <!-- ADMIN PANEL (hidden until login) -->
+        <div class="panel hidden" id="adminPanel">
+          <h2>Admin Panel <span class="badge">Organiser only</span></h2>
+
+          <label for="adminGameCode">Game Code</label>
+          <input id="adminGameCode" placeholder="Example: MM2025" />
+          <button class="btn-primary" id="adminSetGameBtn">Create / Load Game</button>
+          <p class="small-text">
+            Announce this code to all teams. They must enter the same code on their device.
+          </p>
+
+          <h3>Round Control</h3>
+          <button class="btn-outline" data-round="LOCKED">Lock</button>
+          <button class="btn-outline" data-round="BUY">Buy</button>
+          <button class="btn-outline" data-round="NEWS">News</button>
+          <button class="btn-outline" data-round="TRADE">Trade</button>
+          <button class="btn-danger" data-round="FINAL">Final</button>
+          <p class="small-text">
+            BUY / TRADE: trading allowed. NEWS: apply sector/stock impact. FINAL: freeze trading & collect scores.
+          </p>
+
+          <h3>Add / Edit Stocks</h3>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            <div style="flex: 1 1 140px;">
+              <label for="stockNameInput">Stock Name</label>
+              <input id="stockNameInput" placeholder="Alpha Industries" />
+            </div>
+            <div style="flex: 1 1 140px;">
+              <label for="stockSectorInput">Sector</label>
+              <input id="stockSectorInput" placeholder="IT, Banking, Pharma" />
+            </div>
+            <div style="flex: 0 0 100px;">
+              <label for="stockPriceInput">Price</label>
+              <input id="stockPriceInput" type="number" min="1" placeholder="100" />
+            </div>
+          </div>
+          <button class="btn-primary" id="saveStockBtn">Save / Update</button>
+          <button class="btn-outline" id="clearStockFormBtn">Clear</button>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Stock</th>
+                <th>Sector</th>
+                <th>Price</th>
+                <th>Edit</th>
+                <th>Delete</th>
+              </tr>
+            </thead>
+            <tbody id="stocksAdminTableBody"></tbody>
+          </table>
+
+          <h3 style="margin-top: 10px;">News & Sector Impact</h3>
+          <label for="impactTargetSelect">Target</label>
+          <select id="impactTargetSelect"></select>
+
+          <label for="impactPercentInput">Impact % (e.g. +15 or -20)</label>
+          <input id="impactPercentInput" type="number" placeholder="15" />
+          <button class="btn-primary" id="applyImpactBtn">Apply Impact</button>
+          <p class="small-text">
+            Example: "Sector: IT" with -10 → all IT stocks drop 10%.  
+            "All Stocks" with +5 → whole market rises 5%.
+          </p>
+
+          <h3 style="margin-top: 10px;">Organizer Leaderboard</h3>
+          <label for="lbTeamName">Team Name</label>
+          <input id="lbTeamName" placeholder="Team Alpha" />
+          <label for="lbAmount">Final Amount (Cash + Portfolio)</label>
+          <input id="lbAmount" type="number" placeholder="132500" />
+          <button class="btn-primary" id="addToLeaderboard">Add / Update Team</button>
+          <button class="btn-outline" id="clearLeaderboard">Clear Leaderboard</button>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Team</th>
+                <th>Final Amount</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboardTableBody"></tbody>
+          </table>
+          <p class="small-text">
+            At the end, ask teams for their final total and enter here. Ranks update automatically.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script>
+    // ===== GAME STATE (local only) =====
+    const INITIAL_CASH = 100000;
+
+    let stocks = []; // {id, name, sector, price}
+    let stockIdCounter = 1;
+    let editingStockId = null;
+
+    let currentRound = "LOCKED";
+    let currentGameCode = null;
+
+    const team = {
+      name: null,
+      gameCode: null,
+      cash: INITIAL_CASH,
+      portfolio: {} // stockId -> { qty, avgBuy }
+    };
+
+    let leaderboardData = [];
+
+    // ===== DOM ELEMENTS =====
+    // Player
+    const playerTeamNameInput = document.getElementById("playerTeamName");
+    const playerGameCodeInput = document.getElementById("playerGameCode");
+    const joinGameBtn = document.getElementById("joinGameBtn");
+    const playerArea = document.getElementById("playerArea");
+    const teamNameDisplay = document.getElementById("teamNameDisplay");
+    const gameCodeDisplay = document.getElementById("gameCodeDisplay");
+    const cashDisplay = document.getElementById("cashDisplay");
+    const portfolioDisplay = document.getElementById("portfolioDisplay");
+    const plDisplay = document.getElementById("plDisplay");
+    const roundDisplay = document.getElementById("roundDisplay");
+    const marketTableBody = document.getElementById("marketTableBody");
+    const portfolioTableBody = document.getElementById("portfolioTableBody");
+
+    // Admin auth
+    const tabSignup = document.getElementById("tabSignup");
+    const tabLogin = document.getElementById("tabLogin");
+    const authEmailInput = document.getElementById("authEmail");
+    const authPasswordInput = document.getElementById("authPassword");
+    const authSubmitBtn = document.getElementById("authSubmitBtn");
+    const adminPanel = document.getElementById("adminPanel");
+
+    // Admin control
+    const adminGameCodeInput = document.getElementById("adminGameCode");
+    const adminSetGameBtn = document.getElementById("adminSetGameBtn");
+    const roundButtons = document.querySelectorAll("[data-round]");
+
+    const stockNameInput = document.getElementById("stockNameInput");
+    const stockSectorInput = document.getElementById("stockSectorInput");
+    const stockPriceInput = document.getElementById("stockPriceInput");
+    const saveStockBtn = document.getElementById("saveStockBtn");
+    const clearStockFormBtn = document.getElementById("clearStockFormBtn");
+    const stocksAdminTableBody = document.getElementById("stocksAdminTableBody");
+
+    const impactTargetSelect = document.getElementById("impactTargetSelect");
+    const impactPercentInput = document.getElementById("impactPercentInput");
+    const applyImpactBtn = document.getElementById("applyImpactBtn");
+
+    const lbTeamNameInput = document.getElementById("lbTeamName");
+    const lbAmountInput = document.getElementById("lbAmount");
+    const addToLeaderboardBtn = document.getElementById("addToLeaderboard");
+    const clearLeaderboardBtn = document.getElementById("clearLeaderboard");
+    const leaderboardTableBody = document.getElementById("leaderboardTableBody");
+
+    const toastEl = document.getElementById("toast");
+
+    // ===== UTILITIES =====
+    function showToast(message) {
+      toastEl.textContent = message;
+      toastEl.style.display = "block";
+      setTimeout(() => {
+        toastEl.style.display = "none";
+      }, 2200);
+    }
+
+    function formatMoney(n) {
+      return "₹" + n.toLocaleString("en-IN", { maximumFractionDigits: 0 });
+    }
+
+    function updateDashboard() {
+      teamNameDisplay.textContent = team.name || "–";
+      gameCodeDisplay.textContent = team.gameCode || currentGameCode || "–";
+      cashDisplay.textContent = formatMoney(team.cash);
+
+      let portfolioValue = 0;
+      for (const stockId in team.portfolio) {
+        const holding = team.portfolio[stockId];
+        const stock = stocks.find(s => s.id === Number(stockId));
+        if (!stock) continue;
+        portfolioValue += holding.qty * stock.price;
+      }
+      portfolioDisplay.textContent = formatMoney(portfolioValue);
+
+      const totalNow = team.cash + portfolioValue;
+      const diff = totalNow - INITIAL_CASH;
+      plDisplay.textContent = "P/L: " + formatMoney(diff);
+      plDisplay.classList.toggle("positive", diff >= 0);
+      plDisplay.classList.toggle("negative", diff < 0);
+
+      roundDisplay.textContent = currentRound;
+    }
+
+    function renderMarketTable() {
+      marketTableBody.innerHTML = "";
+      stocks.forEach(stock => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${stock.name}</td>
+          <td>${stock.sector}</td>
+          <td>${formatMoney(stock.price)}</td>
+          <td><input class="qty-input" type="number" min="1" id="qty-${stock.id}"></td>
+          <td><button class="btn-outline" data-action="buy" data-id="${stock.id}">BUY</button></td>
+          <td><button class="btn-outline" data-action="sell" data-id="${stock.id}">SELL</button></td>
+        `;
+        marketTableBody.appendChild(tr);
+      });
+    }
+
+    function renderPortfolioTable() {
+      portfolioTableBody.innerHTML = "";
+      for (const stockId in team.portfolio) {
+        const holding = team.portfolio[stockId];
+        if (holding.qty <= 0) continue;
+        const stock = stocks.find(s => s.id === Number(stockId));
+        if (!stock) continue;
+        const currentVal = holding.qty * stock.price;
+        const costVal = holding.qty * holding.avgBuy;
+        const diff = currentVal - costVal;
+        const diffClass = diff >= 0 ? "positive" : "negative";
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${stock.name}</td>
+          <td>${holding.qty}</td>
+          <td>${formatMoney(holding.avgBuy)}</td>
+          <td>${formatMoney(stock.price)}</td>
+          <td class="${diffClass}">${formatMoney(diff)}</td>
+        `;
+        portfolioTableBody.appendChild(tr);
+      }
+    }
+
+    function rebuildImpactTargetOptions() {
+      const sectors = new Set();
+      stocks.forEach(s => sectors.add(s.sector.trim() || "General"));
+
+      impactTargetSelect.innerHTML = "";
+      const optAll = document.createElement("option");
+      optAll.value = "ALL";
+      optAll.textContent = "All Stocks";
+      impactTargetSelect.appendChild(optAll);
+
+      sectors.forEach(sec => {
+        const o = document.createElement("option");
+        o.value = "SECTOR:" + sec;
+        o.textContent = "Sector: " + sec;
+        impactTargetSelect.appendChild(o);
+      });
+
+      stocks.forEach(stock => {
+        const o = document.createElement("option");
+        o.value = "STOCK:" + stock.id;
+        o.textContent = "Stock: " + stock.name;
+        impactTargetSelect.appendChild(o);
+      });
+    }
+
+    function renderStocksAdminTable() {
+      stocksAdminTableBody.innerHTML = "";
+      stocks.forEach(stock => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${stock.name}</td>
+          <td>${stock.sector}</td>
+          <td>${formatMoney(stock.price)}</td>
+          <td><button class="btn-outline" data-edit-id="${stock.id}">Edit</button></td>
+          <td><button class="btn-danger" data-delete-id="${stock.id}">Delete</button></td>
+        `;
+        stocksAdminTableBody.appendChild(tr);
+      });
+    }
+
+    function resetStockForm() {
+      stockNameInput.value = "";
+      stockSectorInput.value = "";
+      stockPriceInput.value = "";
+      editingStockId = null;
+    }
+
+    // ===== AUTH (LOGIN / SIGNUP) =====
+    let authMode = "signup"; // "signup" or "login"
+
+    function setAuthMode(mode) {
+      authMode = mode;
+      if (mode === "signup") {
+        tabSignup.classList.add("active");
+        tabLogin.classList.remove("active");
+        authSubmitBtn.textContent = "Sign Up";
+      } else {
+        tabLogin.classList.add("active");
+        tabSignup.classList.remove("active");
+        authSubmitBtn.textContent = "Login";
+      }
+    }
+
+    tabSignup.addEventListener("click", () => setAuthMode("signup"));
+    tabLogin.addEventListener("click", () => setAuthMode("login"));
+
+    authSubmitBtn.addEventListener("click", () => {
+      const email = authEmailInput.value.trim();
+      const password = authPasswordInput.value;
+
+      if (!email || !password) {
+        showToast("Enter email and password.");
+        return;
+      }
+
+      if (authMode === "signup") {
+        // store locally
+        localStorage.setItem("mm_admin_email", email);
+        localStorage.setItem("mm_admin_password", password);
+        showToast("Signup successful. You can now login.");
+        setAuthMode("login");
+      } else {
+        const savedEmail = localStorage.getItem("mm_admin_email");
+        const savedPassword = localStorage.getItem("mm_admin_password");
+        if (email === savedEmail && password === savedPassword) {
+          showToast("Login successful. Admin panel unlocked.");
+          adminPanel.classList.remove("hidden");
+        } else {
+          showToast("Incorrect email or password.");
+        }
+      }
+    });
+
+    // ===== PLAYER LOGIC =====
+    joinGameBtn.addEventListener("click", () => {
+      const name = playerTeamNameInput.value.trim();
+      const gameCode = playerGameCodeInput.value.trim();
+
+      if (!name || !gameCode) {
+        showToast("Enter both team name and game code.");
+        return;
+      }
+
+      team.name = name;
+      team.gameCode = gameCode;
+      team.cash = INITIAL_CASH;
+      team.portfolio = {};
+      playerArea.classList.remove("hidden");
+      currentGameCode = gameCode;
+
+      updateDashboard();
+      renderPortfolioTable();
+      showToast("Joined game as " + name);
+    });
+
+    // ===== ADMIN LOGIC =====
+    adminSetGameBtn.addEventListener("click", () => {
+      const code = adminGameCodeInput.value.trim();
+      if (!code) {
+        showToast("Enter a game code.");
+        return;
+      }
+      currentGameCode = code;
+      gameCodeDisplay.textContent = code;
+      showToast("Game code set to " + code + ". Announce this to teams.");
+    });
+
+    roundButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const r = btn.getAttribute("data-round");
+        currentRound = r;
+        roundDisplay.textContent = r;
+        showToast("Round changed to " + r);
+      });
+    });
+
+    saveStockBtn.addEventListener("click", () => {
+      const name = stockNameInput.value.trim();
+      const sector = stockSectorInput.value.trim() || "General";
+      const price = Number(stockPriceInput.value);
+
+      if (!name || !price || price <= 0) {
+        showToast("Enter stock name and valid price.");
+        return;
+      }
+
+      if (editingStockId != null) {
+        const s = stocks.find(st => st.id === editingStockId);
+        if (s) {
+          s.name = name;
+          s.sector = sector;
+          s.price = price;
+        }
+        showToast("Stock updated.");
+      } else {
+        const newStock = { id: stockIdCounter++, name, sector, price };
+        stocks.push(newStock);
+        showToast("Stock added.");
+      }
+
+      renderMarketTable();
+      renderStocksAdminTable();
+      rebuildImpactTargetOptions();
+      resetStockForm();
+      updateDashboard();
+    });
+
+    clearStockFormBtn.addEventListener("click", resetStockForm);
+
+    stocksAdminTableBody.addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+
+      const editId = btn.getAttribute("data-edit-id");
+      const deleteId = btn.getAttribute("data-delete-id");
+
+      if (editId) {
+        const id = Number(editId);
+        const s = stocks.find(st => st.id === id);
+        if (!s) return;
+        stockNameInput.value = s.name;
+        stockSectorInput.value = s.sector;
+        stockPriceInput.value = s.price;
+        editingStockId = id;
+      } else if (deleteId) {
+        const id = Number(deleteId);
+        stocks = stocks.filter(st => st.id !== id);
+        delete team.portfolio[id];
+
+        renderMarketTable();
+        renderStocksAdminTable();
+        rebuildImpactTargetOptions();
+        renderPortfolioTable();
+        updateDashboard();
+        showToast("Stock deleted.");
+      }
+    });
+
+    applyImpactBtn.addEventListener("click", () => {
+      const target = impactTargetSelect.value;
+      const impact = Number(impactPercentInput.value);
+
+      if (!target) {
+        showToast("Select target.");
+        return;
+      }
+      if (!impact && impact !== 0) {
+        showToast("Enter impact percentage.");
+        return;
+      }
+
+      stocks.forEach(s => {
+        let affected = false;
+        if (target === "ALL") affected = true;
+        else if (target.startsWith("SECTOR:")) {
+          const sectorName = target.split(":")[1];
+          affected = (s.sector === sectorName);
+        } else if (target.startsWith("STOCK:")) {
+          const id = Number(target.split(":")[1]);
+          affected = (s.id === id);
+        }
+
+        if (affected) {
+          s.price = Math.max(1, Math.round(s.price * (1 + impact / 100)));
+        }
+      });
+
+      renderMarketTable();
+      renderPortfolioTable();
+      updateDashboard();
+      showToast("Impact applied: " + impact + "%");
+    });
+
+    // Player buy/sell
+    marketTableBody.addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+
+      const action = btn.getAttribute("data-action");
+      const id = Number(btn.getAttribute("data-id"));
+      const qtyInput = document.getElementById("qty-" + id);
+      const qty = Number(qtyInput.value);
+
+      if (!team.name) {
+        showToast("Join the game first in Player panel.");
+        return;
+      }
+
+      if (currentRound !== "BUY" && currentRound !== "TRADE") {
+        showToast("Trading is locked in this round.");
+        return;
+      }
+
+      if (!qty || qty <= 0) {
+        showToast("Enter valid quantity.");
+        return;
+      }
+
+      const stock = stocks.find(s => s.id === id);
+      if (!stock) {
+        showToast("Stock not found.");
+        return;
+      }
+
+      const totalPrice = qty * stock.price;
+
+      if (action === "buy") {
+        if (totalPrice > team.cash) {
+          showToast("Not enough cash.");
+          return;
+        }
+        team.cash -= totalPrice;
+        if (!team.portfolio[id]) {
+          team.portfolio[id] = { qty: 0, avgBuy: stock.price };
+        }
+        const holding = team.portfolio[id];
+        const newQty = holding.qty + qty;
+        const newTotalCost = holding.qty * holding.avgBuy + qty * stock.price;
+        holding.qty = newQty;
+        holding.avgBuy = newTotalCost / newQty;
+        showToast(`Bought ${qty} of ${stock.name}.`);
+      } else if (action === "sell") {
+        const holding = team.portfolio[id];
+        if (!holding || holding.qty < qty) {
+          showToast("Not enough shares.");
+          return;
+        }
+        holding.qty -= qty;
+        team.cash += totalPrice;
+        showToast(`Sold ${qty} of ${stock.name}.`);
+      }
+
+      qtyInput.value = "";
+      updateDashboard();
+      renderPortfolioTable();
+    });
+
+    // ===== LEADERBOARD =====
+    function renderLeaderboard() {
+      leaderboardTableBody.innerHTML = "";
+      leaderboardData.sort((a, b) => b.amount - a.amount);
+      leaderboardData.forEach((row, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>#${index + 1}</td>
+          <td>${row.name}</td>
+          <td>${formatMoney(row.amount)}</td>
+        `;
+        leaderboardTableBody.appendChild(tr);
+      });
+    }
+
+    addToLeaderboardBtn.addEventListener("click", () => {
+      const name = lbTeamNameInput.value.trim();
+      const amount = Number(lbAmountInput.value);
+
+      if (!name || !amount) {
+        showToast("Enter team name and final amount.");
+        return;
+      }
+
+      const existing = leaderboardData.find(t => t.name === name);
+      if (existing) {
+        existing.amount = amount;
+        showToast("Team updated.");
+      } else {
+        leaderboardData.push({ name, amount });
+        showToast("Team added.");
+      }
+
+      renderLeaderboard();
+      lbTeamNameInput.value = "";
+      lbAmountInput.value = "";
+    });
+
+    clearLeaderboardBtn.addEventListener("click", () => {
+      if (confirm("Clear the leaderboard?")) {
+        leaderboardData = [];
+        renderLeaderboard();
+        showToast("Leaderboard cleared.");
+      }
+    });
+
+    // ===== INITIAL DATA =====
+    function seedSampleStocks() {
+      stocks = [
+        { id: stockIdCounter++, name: "Alpha Industries", sector: "Manufacturing", price: 120 },
+        { id: stockIdCounter++, name: "Bharat Tech", sector: "IT", price: 150 },
+        { id: stockIdCounter++, name: "Capital Bank", sector: "Banking", price: 90 },
+        { id: stockIdCounter++, name: "Delta Pharma", sector: "Pharma", price: 80 },
+        { id: stockIdCounter++, name: "Falcon FMCG", sector: "FMCG", price: 70 }
+      ];
+      renderMarketTable();
+      renderStocksAdminTable();
+      rebuildImpactTargetOptions();
+    }
+
+    // On load
+    setAuthMode("signup");
+    seedSampleStocks();
+    updateDashboard();
+  </script>
+</body>
+</html>
