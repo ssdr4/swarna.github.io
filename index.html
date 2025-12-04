@@ -523,6 +523,29 @@
   </div>
 
   <script>
+    <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyDAzr1Q9cZe9qNRtJHLnd3621FAfTknsJc",
+    authDomain: "market-master-s.firebaseapp.com",
+    projectId: "market-master-s",
+    storageBucket: "market-master-s.firebasestorage.app",
+    messagingSenderId: "484925504778",
+    appId: "1:484925504778:web:103b6f0deca456e8bc8ef3",
+    measurementId: "G-CMC4CZPMHV"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
     // ===== GAME STATE (local only) =====
     const INITIAL_CASH = 100000;
 
@@ -1029,3 +1052,4 @@
   </script>
 </body>
 </html>
+
